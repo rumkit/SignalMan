@@ -17,7 +17,22 @@ namespace SignalMan.Models
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return new Scope<TState>(state);
+        }
+
+        private class Scope<TState> : IDisposable
+        {
+            private readonly TState _state;
+            public Scope(TState state)
+            {
+                ApplicationLogService.Default.PublishMessage($"New scope: {_state}");
+                _state = state;
+            }
+
+            public void Dispose()
+            {
+                ApplicationLogService.Default.PublishMessage($"Scope end: {_state}");
+            }
         }
     }
 }

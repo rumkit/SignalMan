@@ -38,8 +38,6 @@ namespace SignalMan.ViewModels
         public ReactiveCommand<Unit, Unit> Connect { get; }
         public ReactiveCommand<Unit, Unit> Disconnect { get; }
 
-        
-
         public MainWindowViewModel(IHubConnector connector, IApplicationLogService logService)
         {
             _connector = connector;
@@ -52,10 +50,16 @@ namespace SignalMan.ViewModels
                 (hubUrl, isConnected) => 
                     !string.IsNullOrEmpty(hubUrl) && !isConnected);
 
+            var canDisconnect = this.WhenAnyValue(
+                x => x.HubUrl, x => x.IsConnected,
+                (hubUrl, isConnected) => 
+                    !string.IsNullOrEmpty(hubUrl) && isConnected);
+
             Connect = ReactiveCommand.CreateFromTask(async () => await ConnectAsync(),
                 canConnect);
 
-            Disconnect = ReactiveCommand.CreateFromTask(async () => await DisconnectAsync());
+            Disconnect = ReactiveCommand.CreateFromTask(async () => await DisconnectAsync(),
+                canDisconnect);
         }
         
         private async Task<Unit> DisconnectAsync()
