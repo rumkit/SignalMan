@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using SignalMan.ViewModels;
 using SignalMan.Views;
+using Splat;
 
 namespace SignalMan
 {
@@ -19,7 +20,7 @@ namespace SignalMan
             {
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = Locator.Current.GetService<MainWindowViewModel>(),
                 };
             }
 

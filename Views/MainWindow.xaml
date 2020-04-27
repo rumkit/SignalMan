@@ -36,15 +36,16 @@
         <DockPanel.Styles>
           <Style Selector="StackPanel > Button">
             <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush2}"/>
           </Style>
         </DockPanel.Styles>
         <TextBlock Classes="panelHeader">Control panel</TextBlock>
          <!-- connection controls --> 
         <Border DockPanel.Dock="Top" Margin="5" BorderBrush="{DynamicResource ThemeAccentBrush4}" BorderThickness="2" CornerRadius="5">
         <StackPanel>          
-          <TextBox Watermark="SignalR URL" ToolTip.Tip="e.g. http://localhost:52815/notification" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5"></TextBox>
-          <Button BorderBrush="{DynamicResource ThemeAccentBrush2}">Connect</Button>
-          <Button BorderBrush="{DynamicResource ThemeAccentBrush2}">Disconnect</Button>
+          <TextBox Watermark="SignalR URL" ToolTip.Tip="e.g. http://localhost:52815/notification" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5" Text="{Binding HubUrl}"></TextBox>
+          <Button Command="{Binding Connect}">Connect</Button>
+          <Button>Disconnect</Button>
         </StackPanel>
         </Border>
         <!-- filters --> 
@@ -69,7 +70,7 @@
     <Grid Grid.Column="2" Grid.Row="2">
       <DockPanel>
         <TextBlock Classes="panelHeader">Log</TextBlock>
-        <TextBox DockPanel.Dock="Top" Margin="5" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible"></TextBox>
+        <ListBox Items="{Binding LogMessages}" DockPanel.Dock="Top" Margin="5" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListBox>
       </DockPanel>
     </Grid>
   </Grid>
