@@ -70,7 +70,7 @@
     <Grid Grid.Column="2" Grid.Row="2">
       <DockPanel>
         <TextBlock Classes="panelHeader">Log</TextBlock>
-        <ListBox Items="{Binding LogMessages}" DockPanel.Dock="Top" Margin="5" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListBox>
+        <TextBox Text="{Binding LogMessages}" IsReadOnly="True" DockPanel.Dock="Top" Margin="5" ScrollViewer.VerticalScrollBarVisibility="Visible"></TextBox>
       </DockPanel>
     </Grid>
   </Grid>
