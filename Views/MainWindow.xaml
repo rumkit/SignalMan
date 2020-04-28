@@ -10,9 +10,9 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="SignalMan">
 
-  <Design.DataContext>
+  <!--<Design.DataContext>
     <vm:MainWindowViewModel/>
-  </Design.DataContext>
+  </Design.DataContext>-->
 
   <Grid>
     <Grid.Styles>
@@ -42,20 +42,27 @@
           </Style>
         </DockPanel.Styles>
         <TextBlock Classes="panelHeader">Control panel</TextBlock>
-         <!-- connection controls --> 
+        <!-- connection controls -->
         <Border DockPanel.Dock="Top" Margin="5" BorderBrush="{DynamicResource ThemeAccentBrush4}" BorderThickness="2" CornerRadius="5">
-        <StackPanel>          
-          <TextBox Watermark="SignalR URL" ToolTip.Tip="e.g. http://localhost:52815/notification" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5" Text="{Binding HubUrl}"></TextBox>
-          <Button Command="{Binding Connect}">Connect</Button>
-          <Button Command="{Binding Disconnect}">Disconnect</Button>
-        </StackPanel>
+          <StackPanel>
+            <TextBox Watermark="SignalR URL" ToolTip.Tip="e.g. http://localhost:52815/notification" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5" Text="{Binding HubUrl}"></TextBox>
+            <Button Command="{Binding Connect}">Connect</Button>
+            <Button Command="{Binding Disconnect}">Disconnect</Button>
+          </StackPanel>
         </Border>
-        <!-- filters --> 
+        <!-- filters -->
         <Border Margin="5" BorderBrush="{DynamicResource ThemeAccentBrush4}" BorderThickness="2" CornerRadius="5">
-        <DockPanel>          
-          <TextBox DockPanel.Dock="Top" Watermark="Type to add endpoint filter" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5"/> 
-          <ListBox Margin="5" DockPanel.Dock="Top"/>
-        </DockPanel>
+          <DockPanel>
+            <Grid DockPanel.Dock="Top">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="32"/>
+              </Grid.ColumnDefinitions>
+              <TextBox Text="{Binding MethodFilterName}" DockPanel.Dock="Top" Grid.Column="0" Watermark="Type to add method filter" BorderBrush="{DynamicResource ThemeAccentBrush2}" Margin="5"/>
+              <Button Command="{Binding AddMethodFilter}" Grid.Column="1" Margin="1,5,5,5" FontWeight="Bold" FontFamily="Consolas">+</Button>
+            </Grid>
+            <ListBox Items="{Binding MethodFilters}" Margin="5" DockPanel.Dock="Top"/>
+          </DockPanel>
         </Border>
       </DockPanel>
     </Grid>

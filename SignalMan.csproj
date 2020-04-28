@@ -13,10 +13,26 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\MethodFilterView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\MethodFilterView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.3" />
     <PackageReference Include="Splat.Autofac" Version="9.4.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\MethodFilterView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\MethodFilterView.xaml.cs">
+      <DependentUpon>MethodFilterView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

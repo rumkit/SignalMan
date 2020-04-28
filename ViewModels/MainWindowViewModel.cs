@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using ReactiveUI;
 using SignalMan.Models;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace SignalMan.ViewModels
@@ -29,14 +27,27 @@ namespace SignalMan.ViewModels
         }
 
         private string _logMessages = string.Empty;
+
         public string LogMessages
         {
             get => _logMessages;
             set => this.RaiseAndSetIfChanged(ref _logMessages, value);
         }
 
+        private string _methodFilterName;
+
+        public string MethodFilterName
+        {
+            get => _methodFilterName;
+            set => this.RaiseAndSetIfChanged(ref _methodFilterName, value);
+        }
+
+        public ObservableCollection<MethodFilterViewModel> MethodFilters { get; } = new ObservableCollection<MethodFilterViewModel>();
+
         public ReactiveCommand<Unit, Unit> Connect { get; }
         public ReactiveCommand<Unit, Unit> Disconnect { get; }
+        public ReactiveCommand<Unit, Unit> AddMethodFilter { get; }
+        public ReactiveCommand<MethodFilterViewModel, Unit> RemoveMethodFilter { get; }
 
         public MainWindowViewModel(IHubConnector connector, IApplicationLogService logService)
         {
@@ -55,13 +66,35 @@ namespace SignalMan.ViewModels
                 (hubUrl, isConnected) => 
                     !string.IsNullOrEmpty(hubUrl) && isConnected);
 
+            var canAddFilter = this.WhenAnyValue(
+                x => x.MethodFilterName,
+                (name) => !string.IsNullOrWhiteSpace(name));
+
             Connect = ReactiveCommand.CreateFromTask(async () => await ConnectAsync(),
                 canConnect);
 
             Disconnect = ReactiveCommand.CreateFromTask(async () => await DisconnectAsync(),
                 canDisconnect);
+
+            AddMethodFilter = ReactiveCommand.CreateFromTask(async () => await AddMethodFilterAsync(),
+                canAddFilter);
+
+            RemoveMethodFilter = ReactiveCommand.CreateFromTask<MethodFilterViewModel, Unit>(async (method) => await RemoveMethodFilterAsync(method));
         }
-        
+
+        private async Task<Unit> RemoveMethodFilterAsync(MethodFilterViewModel method)
+        {
+            MethodFilters.Remove(method);
+            return await Task.FromResult(Unit.Default);
+        }
+
+        private async Task<Unit> AddMethodFilterAsync()
+        {
+            MethodFilters.Add(new MethodFilterViewModel(MethodFilterName, RemoveMethodFilter));
+            MethodFilterName = string.Empty;
+            return await Task.FromResult(Unit.Default);
+        }
+
         private async Task<Unit> DisconnectAsync()
         {
             await _connector.DisconnectAsync();
