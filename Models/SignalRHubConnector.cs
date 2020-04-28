@@ -14,8 +14,11 @@ namespace SignalMan.Models
     {
         private HubConnection _connection;
         private CancellationTokenSource _cts;
+        private readonly JsonFormatter _jsonFormatter = new JsonFormatter();
 
-        public async Task ConnectAsync(string url, IEnumerable<HubMethodHandler> methodHandlers = null)
+        public event JsonMessageReceived MessageReceived;
+
+        public async Task ConnectAsync(string url, IEnumerable<string> methodSubscriptions = null)
         {
             if (_connection != null)
                 throw new InvalidOperationException("Connection already exists");
@@ -30,7 +33,7 @@ namespace SignalMan.Models
                 })
                 .Build();
 
-            SubscribeToEvents(_connection, methodHandlers);
+            SubscribeToEvents(_connection, methodSubscriptions);
 
             await _connection.StartAsync(_cts.Token);
         }
@@ -48,54 +51,19 @@ namespace SignalMan.Models
             }
         }
 
-        private void SubscribeToEvents(HubConnection connection, IEnumerable<HubMethodHandler> methodHandlers)
+        private void SubscribeToEvents(HubConnection connection, IEnumerable<string> subscriptions)
         {
-            if (methodHandlers == null)
+            if (subscriptions == null)
                 return;
 
-            foreach (var handler in methodHandlers)
+            foreach (var methodName in subscriptions)
             {
-                connection.On<JsonElement>(handler.MethodName, (element) =>
+                connection.On<JsonElement>(methodName, async (element) =>
                 {
-                    var jsonString = HandleJsonElement(element);
-                    handler.MethodCallback(jsonString);
+                    var jsonString = await _jsonFormatter.ConvertToStringAsync(element);
+                    MessageReceived?.Invoke(methodName, jsonString);
                 });
             }
-        }
-
-        private string HandleJsonElement(JsonElement element)
-        {
-            var writerOptions = new JsonWriterOptions
-            {
-                Indented = true
-            };
-
-            var documentOptions = new JsonDocumentOptions
-            {
-                CommentHandling = JsonCommentHandling.Skip
-            };
-            using var ms = new MemoryStream();
-            using var writer = new Utf8JsonWriter(ms, writerOptions);
-
-            if (element.ValueKind == JsonValueKind.Object)
-            {
-                writer.WriteStartObject();
-            }
-            else
-            {
-                return null;
-            }
-
-            foreach (JsonProperty property in element.EnumerateObject())
-            {
-                property.WriteTo(writer);
-            }
-
-            writer.WriteEndObject();
-            writer.Flush();
-
-            using var reader = new StreamReader(new MemoryStream(ms.ToArray()), Encoding.UTF8);
-            return reader.ReadToEnd();
         }
     }
 }

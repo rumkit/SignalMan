@@ -28,7 +28,6 @@ namespace SignalMan.ViewModels
         }
 
         private string _logMessages = string.Empty;
-
         public string LogMessages
         {
             get => _logMessages;
@@ -36,11 +35,17 @@ namespace SignalMan.ViewModels
         }
 
         private string _methodFilterName;
-
         public string MethodFilterName
         {
             get => _methodFilterName;
             set => this.RaiseAndSetIfChanged(ref _methodFilterName, value);
+        }
+
+        private JsonMessageViewModel _lastMessage;
+        public JsonMessageViewModel LastMessage
+        {
+            get => _lastMessage;
+            set => this.RaiseAndSetIfChanged(ref _lastMessage, value);
         }
 
         public ObservableCollection<MethodFilterViewModel> MethodFilters { get; } = new ObservableCollection<MethodFilterViewModel>();
@@ -57,6 +62,7 @@ namespace SignalMan.ViewModels
             _logService = logService;
 
             logService.MessageReceived += (sender, message) => LogMessages += $"{message}{Environment.NewLine}";
+            connector.MessageReceived += JsonMessageReceived;
             
             var canConnect = this.WhenAnyValue(
                 x => x.HubUrl, x => x.IsConnected,
@@ -84,6 +90,19 @@ namespace SignalMan.ViewModels
             RemoveMethodFilter = ReactiveCommand.CreateFromTask<MethodFilterViewModel, Unit>(async (method) => await RemoveMethodFilterAsync(method));
         }
 
+        private void JsonMessageReceived(string method, string text)
+        {
+            var messageVm = new JsonMessageViewModel()
+            {
+                Text = text,
+                Method = method,
+                Received = DateTime.Now
+            };
+
+            ReceivedMessages.Add(messageVm);
+            LastMessage = messageVm;
+        }
+
         private async Task<Unit> RemoveMethodFilterAsync(MethodFilterViewModel method)
         {
             MethodFilters.Remove(method);
@@ -104,25 +123,13 @@ namespace SignalMan.ViewModels
             return Unit.Default;
         }
 
-        private void OnHubMessageReceived(object parameter)
-        {
-            ReceivedMessages.Add(new JsonMessageViewModel()
-            {
-                Text = parameter.ToString()
-            });
-        }
-
         private async Task<Unit> ConnectAsync()
         {
             IsConnected = true;
             try
             {
                 var methods = MethodFilters
-                    .Select(filter => new HubMethodHandler()
-                    {
-                        MethodName = filter.Name,
-                        MethodCallback = OnHubMessageReceived
-                    });
+                    .Select(filter => filter.Name);
                 await _connector.ConnectAsync(HubUrl, methods.ToList());
             }
             catch
