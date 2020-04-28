@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using ReactiveUI;
 using SignalMan.Models;
 using System.Reactive;
@@ -102,12 +103,23 @@ namespace SignalMan.ViewModels
             return Unit.Default;
         }
 
+        private void OnHubMessageReceived(object parameter)
+        {
+
+        }
+
         private async Task<Unit> ConnectAsync()
         {
             IsConnected = true;
             try
             {
-                await _connector.ConnectAsync(HubUrl);
+                var methods = MethodFilters
+                    .Select(filter => new HubMethodHandler()
+                    {
+                        MethodName = filter.Name,
+                        MethodCallback = OnHubMessageReceived
+                    });
+                await _connector.ConnectAsync(HubUrl, methods.ToList());
             }
             catch
             {
