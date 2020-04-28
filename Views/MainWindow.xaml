@@ -71,7 +71,7 @@
     <Grid Grid.Column="2" Grid.Row="0">
       <DockPanel>
         <TextBlock Classes="panelHeader">Notifications</TextBlock>
-        <ListBox DockPanel.Dock="Top" Margin="5,5,6,5" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListBox>
+        <ListBox Items="{Binding ReceivedMessages}" DockPanel.Dock="Top" Margin="5,5,6,5" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListBox>
       </DockPanel>
     </Grid>
     <GridSplitter BorderThickness="2" Grid.Row="1" Grid.Column="2"></GridSplitter>

@@ -44,6 +44,7 @@ namespace SignalMan.ViewModels
         }
 
         public ObservableCollection<MethodFilterViewModel> MethodFilters { get; } = new ObservableCollection<MethodFilterViewModel>();
+        public ObservableCollection<JsonMessageViewModel> ReceivedMessages { get; } = new ObservableCollection<JsonMessageViewModel>();
 
         public ReactiveCommand<Unit, Unit> Connect { get; }
         public ReactiveCommand<Unit, Unit> Disconnect { get; }
@@ -105,7 +106,10 @@ namespace SignalMan.ViewModels
 
         private void OnHubMessageReceived(object parameter)
         {
-
+            ReceivedMessages.Add(new JsonMessageViewModel()
+            {
+                Text = parameter.ToString()
+            });
         }
 
         private async Task<Unit> ConnectAsync()
