@@ -106,13 +106,22 @@ namespace SignalMan.ViewModels
         private async Task<Unit> RemoveMethodFilterAsync(MethodFilterViewModel method)
         {
             MethodFilters.Remove(method);
+
+            if(IsConnected)
+                _connector.RemoveMethod(method.Name);
+
             return await Task.FromResult(Unit.Default);
         }
 
         private async Task<Unit> AddMethodFilterAsync()
         {
-            MethodFilters.Add(new MethodFilterViewModel(MethodFilterName, RemoveMethodFilter));
+            var methodName = MethodFilterName;
+            MethodFilters.Add(new MethodFilterViewModel(methodName, RemoveMethodFilter));
             MethodFilterName = string.Empty;
+
+            if(IsConnected)
+                _connector.AddMethod(methodName);
+
             return await Task.FromResult(Unit.Default);
         }
 
@@ -128,9 +137,14 @@ namespace SignalMan.ViewModels
             IsConnected = true;
             try
             {
+                await _connector.ConnectAsync(HubUrl);
+
                 var methods = MethodFilters
                     .Select(filter => filter.Name);
-                await _connector.ConnectAsync(HubUrl, methods.ToList());
+                foreach (var method in methods)
+                {
+                    _connector.AddMethod(method);
+                }
             }
             catch
             {

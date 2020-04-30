@@ -18,7 +18,7 @@ namespace SignalMan.Models
 
         public event JsonMessageReceived MessageReceived;
 
-        public async Task ConnectAsync(string url, IEnumerable<string> methodSubscriptions = null)
+        public async Task ConnectAsync(string url)
         {
             if (_connection != null)
                 throw new InvalidOperationException("Connection already exists");
@@ -32,8 +32,6 @@ namespace SignalMan.Models
                     logging.SetMinimumLevel(LogLevel.Debug);
                 })
                 .Build();
-
-            SubscribeToEvents(_connection, methodSubscriptions);
 
             await _connection.StartAsync(_cts.Token);
         }
@@ -51,19 +49,18 @@ namespace SignalMan.Models
             }
         }
 
-        private void SubscribeToEvents(HubConnection connection, IEnumerable<string> subscriptions)
+        public void AddMethod(string method)
         {
-            if (subscriptions == null)
-                return;
-
-            foreach (var methodName in subscriptions)
+            _connection?.On<JsonElement>(method, async (element) =>
             {
-                connection.On<JsonElement>(methodName, async (element) =>
-                {
-                    var jsonString = await _jsonFormatter.ConvertToStringAsync(element);
-                    MessageReceived?.Invoke(methodName, jsonString);
-                });
-            }
+                var jsonString = await _jsonFormatter.ConvertToStringAsync(element);
+                MessageReceived?.Invoke(method, jsonString);
+            });
+        }
+
+        public void RemoveMethod(string method)
+        {
+            _connection?.Remove(method);
         }
     }
 }

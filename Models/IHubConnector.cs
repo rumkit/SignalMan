@@ -7,8 +7,11 @@ namespace SignalMan.Models
 
     public interface IHubConnector
     {
-        Task ConnectAsync(string url, IEnumerable<string> methodSubscriptions = null);
+        Task ConnectAsync(string url);
         Task DisconnectAsync();
+
+        void AddMethod(string method);
+        void RemoveMethod(string method);
 
         event JsonMessageReceived MessageReceived;
     }
